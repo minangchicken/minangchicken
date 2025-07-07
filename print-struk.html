@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>Print Struk Nota</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #fff;
+      padding: 20px;
+    }
+
+    #struk {
+      max-width: 220px;
+      margin: auto;
+      padding: 5px 10px;
+      border: none;
+    }
+
+    #struk header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #struk header h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 2px;
+    }
+
+    #struk header p {
+      font-size: 11px;
+      margin: 4px 0 15px;
+      font-weight: 600;
+    }
+
+    #struk .items {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    #struk .items th,
+    #struk .items td {
+      font-size: 12px;
+      padding: 6px 0;
+      font-weight: 600;
+    }
+
+    #struk .items th {
+      border-bottom: 1px dashed #000;
+      text-align: left;
+    }
+
+    #struk .items td:first-child,
+    #struk .items th:first-child {
+      text-align: left;
+    }
+
+    #struk .items th.qty,
+    #struk .items th.price,
+    #struk .items th.total,
+    #struk .items td.qty,
+    #struk .items td.price,
+    #struk .items td.total {
+      min-width: 50px;
+      text-align: center;
+    }
+
+    #struk .total-line {
+      border-top: 1px dashed #000;
+      margin-top: 10px;
+      padding-top: 5px;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    #btnPrint, #btnKirim {
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      color: white;
+    }
+
+    #btnPrint {
+      background-color: #000;
+    }
+
+    #btnPrint:hover {
+      background-color: #333;
+    }
+
+    #btnKirim {
+      background-color: #28a745;
+    }
+
+    #btnKirim:hover {
+      background-color: #218838;
+    }
+
+    /* Modal Styles */
+    #modalOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #modal {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 8px;
+      width: 280px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    #modal h3 {
+      margin-top: 0;
+    }
+
+    #modal label {
+      display: block;
+      margin: 10px 0;
+      font-weight: normal;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #modal button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      font-weight: 600;
+    }
+
+    #modal button:disabled {
+      background-color: #94d3a2;
+      cursor: not-allowed;
+    }
+
+    #modal .btnCancel {
+      background-color: #dc3545;
+      margin-left: 10px;
+    }
+
+    #modal .btnCancel:hover {
+      background-color: #b02a37;
+    }
+
+    /* Responsive */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #struk, #struk * {
+        visibility: visible;
+      }
+      #struk {
+        position: absolute;
+        left: 0; top: 0;
+        width: 280px;
+        border: none;
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        font-weight: 600;
+      }
+      .btn-group {
+        display: none;
+      }
+    }
+
+/* Baris yang di-highlight */
+tr.highlight {
+  position: relative;
+  overflow: visible; /* biar before tidak terpotong */
+}
+
+/* Highlight tiap sel, tapi tampak seperti satu goresan */
+tr.highlight td:not(.highlight-col)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2%;
+  width: 104%;
+  height: 60%;
+  background: linear-gradient(90deg, rgba(255,255,0,0.4), rgba(255,255,0,0.6), rgba(255,255,0,0.4));
+  border-radius: 50% / 40%;
+  filter: blur(1px);
+  transform: translateY(-50%) rotate(-1deg);
+  z-index: -1;
+  pointer-events: none;
+}
+tr.highlight td {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* Saat print dan sending-mode: hilangkan checkbox & lingkaran hitam, hanya stabilo */
+@media print {
+  :root {
+    --circle-width: 40px;     /* Lebar lingkaran kecil */
+    --circle-height: 20px;    /* Tinggi lingkaran kecil */
+    --outline-thickness: 1px;
+    --outline-color: black;
+    --outline-offset: 0.5px;
+  }
+
+  tr.highlight {
+    position: relative;
+    border-radius: var(--circle-width) / var(--circle-height);
+    outline: var(--outline-thickness) solid var(--outline-color);
+    outline-offset: var(--outline-offset);
+    padding: 1px 5px;  /* Lebih kecil agar pas */
+    z-index: 1;
+  }
+
+
+  /* Stabilo tetap muncul */
+  tr.highlight td:not(.highlight-col)::before {
+    background: rgba(255, 235, 59, 0.5);
+    filter: blur(1.2px);
+  }
+
+  /* Sembunyikan kolom checkbox */
+  th.highlight-col,
+  td.highlight-col {
+    display: none !important;
+  }
+}
+/* Saat kirim (pdf/jpg), sembunyikan kolom checkbox */
+.sending-mode th.highlight-col,
+.sending-mode td.highlight-col {
+  display: none !important;
+}
+
+/* Saat kirim, gunakan efek stabilo kuning tanpa lingkaran hitam */
+.sending-mode tr.highlight td:not(.highlight-col) {
+  position: relative;
+}
+.sending-mode tr.highlight td:not(.highlight-col)::before {
+  content: '';
+  background: rgba(255, 235, 59, 0.5);
+  border-radius: 40% / 60%;
+  filter: blur(1.2px);
+  pointer-events: none;
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
+
+
+  </style>
+</head>
+<body>
+
+  <div id="struk">
+    <header>
+      <h2>MINANG CHICKEN</h2>
+      <p>Struk Nota Harian</p>
+      <p style="font-weight: 600;">
+        Nota: <span id="noNota"></span><br>
+        Tanggal: <span id="tglNota"></span><br>
+        Outlet: <span id="outletStruk"></span>
+      </p>
+    </header>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th class="highlight-col">Highlight</th>  <!-- kolom checkbox -->
+          <th>Nama</th>
+          <th class="qty">Qty</th>
+          <th class="price">Harga</th>
+          <th class="total">Total</th>
+        </tr>
+      </thead>
+      <tbody id="tabelItems">
+        <!-- akan diisi otomatis -->
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      <div class="total-line">
+        <span>Total Cash</span>
+        <span id="totalCash">Rp0</span>
+      </div>
+      <div class="total-line">
+        <span>Total Qris</span>
+        <span id="totalQris">Rp0</span>
+      </div>
+      <div class="total-line">
+        <span>Total Bayar</span>
+        <span id="totalBayar">Rp0</span>
+      </div>
+    </div>
+
+
+    <div style="text-align: center; font-size: 11px; margin-top: 15px;">
+      <div class="copyright" >© Minang Chicken 2025</div>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button id="btnPrint">Cetak Struk</button>
+    <button id="btnKirim">Kirim Struk</button>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalOverlay">
+    <div id="modal">
+      <h3>Pilih Format Kirim</h3>
+      <form id="formatForm">
+        <label><input type="radio" name="format" value="pdf" checked /> PDF</label>
+        <label><input type="radio" name="format" value="jpg" /> JPG</label>
+      </form>
+      <div>
+        <button id="modalBtnKirim">Kirim</button>
+        <button id="modalBtnCancel" class="btnCancel">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // Data dari localStorage dan render tabel
+  const dataItems = JSON.parse(localStorage.getItem('strukLaporan') || '[]');
+  const tanggalFilter = localStorage.getItem('filterTanggal') || new Date().toISOString().split('T')[0];
+  const outletFilter = localStorage.getItem('filterOutlet') || 'Outlet Utama';
+
+  const tbody = document.getElementById('tabelItems');
+  let totalBayar = 0;
+  let totalCash = 0;
+  let totalQris = 0;
+
+  dataItems.forEach((item, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="highlight-col"><input type="checkbox" class="chkHighlight" data-index="${index}"></td>
+      <td>${item.nama}</td>
+      <td class="qty">${item.qty}</td>
+      <td class="price">${item.harga.toLocaleString('id-ID')}</td>
+      <td class="total">${item.total.toLocaleString('id-ID')}</td>
+    `;
+    tbody.appendChild(row);
+
+    totalBayar += item.total;
+
+    // Kalkulasi metode pembayaran jika ada property metode di item
+    if (item.metode === 'cash') totalCash += item.total;
+    else if (item.metode === 'qris') totalQris += item.total;
+  });
+
+  tbody.addEventListener('change', (e) => {
+    if (e.target.classList.contains('chkHighlight')) {
+      const tr = e.target.closest('tr');
+      if (e.target.checked) {
+        tr.classList.add('highlight');
+      } else {
+        tr.classList.remove('highlight');
+      }
+    }
+  });
+
+  // Tampilkan total ke HTML
+  document.getElementById('totalBayar').textContent = totalBayar.toLocaleString('id-ID');
+  document.getElementById('totalCash').textContent = totalCash.toLocaleString('id-ID');
+  document.getElementById('totalQris').textContent = totalQris.toLocaleString('id-ID');
+
+  // Format noNota
+  const tgl = new Date(tanggalFilter);
+  const dd = String(tgl.getDate()).padStart(2, '0');
+  const mm = String(tgl.getMonth() + 1).padStart(2, '0');
+  const yyyy = tgl.getFullYear();
+  const noNota = `MC0824-${dd}${mm}${yyyy}`;
+  document.getElementById('noNota').textContent = noNota;
+
+  // Format tanggal
+  const tglFormat = `${dd}-${mm}-${yyyy}`;
+  document.getElementById('tglNota').textContent = tglFormat;
+
+  // Outlet
+  document.getElementById('outletStruk').textContent = outletFilter;
+
+  // Tombol print
+  document.getElementById('btnPrint').addEventListener('click', () => {
+    window.print();
+  });
+
+  // Modal elemen
+  const modalOverlay = document.getElementById('modalOverlay');
+  const btnKirim = document.getElementById('btnKirim');
+  const modalBtnKirim = document.getElementById('modalBtnKirim');
+  const modalBtnCancel = document.getElementById('modalBtnCancel');
+  const formatForm = document.getElementById('formatForm');
+
+  // Buka modal saat klik Kirim Struk
+  btnKirim.addEventListener('click', () => {
+    modalOverlay.style.display = 'flex';
+  });
+
+  // Tutup modal
+  modalBtnCancel.addEventListener('click', (e) => {
+    e.preventDefault();
+    modalOverlay.style.display = 'none';
+  });
+
+  // Fungsi kirim file ke server
+  async function kirimFileBase64(base64, fileName, mimeType) {
+    const payload = {
+      file: base64,
+      fileName,
+      mimeType,
+      outlet: outletFilter,
+      tanggal: tanggalFilter
+    };
+
+    const response = await fetch('https://distinct-flint-fig.glitch.me/api/upload-struk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error('Gagal mengirim file ke server');
+    return await response.json();
+  }
+
+  // Proses kirim setelah pilih format dan klik Kirim modal
+modalBtnKirim.addEventListener('click', async () => {
+  // Tambah class sending-mode supaya styling berubah saat capture canvas
+  const strukElement = document.getElementById('struk');
+  strukElement.classList.add('sending-mode');
+
+  const selectedFormat = formatForm.format.value;
+  modalBtnKirim.disabled = true;
+  modalBtnKirim.textContent = 'Mengirim...';
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const canvas = await html2canvas(strukElement, { scale: 2 });
+
+    if (selectedFormat === 'pdf') {
+      const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      const pdfBlob = pdf.output('blob');
+
+      const pdfBase64 = await blobToBase64(pdfBlob);
+      await kirimFileBase64(pdfBase64, 'struk.pdf', 'application/pdf');
+    } else {
+      const imgDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const imgBase64 = imgDataUrl.split(',')[1];
+      await kirimFileBase64(imgBase64, 'struk.jpg', 'image/jpeg');
+    }
+
+    alert('Struk berhasil dikirim dalam format ' + selectedFormat.toUpperCase() + '!');
+    modalOverlay.style.display = 'none';
+  } catch (error) {
+    alert('Error: ' + error.message);
+  } finally {
+    modalBtnKirim.disabled = false;
+    modalBtnKirim.textContent = 'Kirim';
+    // Hapus class sending-mode setelah proses selesai
+    strukElement.classList.remove('sending-mode');
+  }
+});
+
+
+  // Helper blob ke base64
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+</script>
+
+</body>
+</html>

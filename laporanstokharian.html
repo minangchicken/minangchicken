@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laporan Stok Harian</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800&display=swap');
+
+  :root {
+    --text-light: #333;
+    --text-dark: #ddd;
+    --table-row-bg-light: #fff;
+    --table-row-bg-dark: #222;
+    --table-row-hover-light: #f0f0f0;
+    --table-row-hover-dark: #333;
+    --table-border-light: #ddd;
+    --table-border-dark: #555;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Montserrat', sans-serif;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 2rem;
+    background-color: #fff;
+    background-image:
+      linear-gradient(to right, #ddd 1px, transparent 1px),
+      linear-gradient(to bottom, #ddd 1px, transparent 1px);
+    background-size: 30px 30px;
+    color: #000;
+    user-select: none;
+  }
+  body.dark {
+    background-color: #121212;
+    background-image:
+      linear-gradient(to right, #222 1px, transparent 1px),
+      linear-gradient(to bottom, #222 1px, transparent 1px);
+    color: #eee;
+  }
+
+  h1 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  #toggleDarkLight {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+    background: transparent;
+    border: 2px solid currentColor;
+    border-radius: 100px;
+    padding: 8px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: inherit;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    z-index: 1000;
+  }
+  #toggleDarkLight:hover {
+    background-color: currentColor;
+    color: var(--text-light);
+  }
+  body.dark #toggleDarkLight:hover {
+    color: var(--text-dark);
+  }
+
+  .filter-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .filter-container label {
+    font-weight: 600;
+    align-self: center;
+  }
+
+  input[type="date"],
+  select {
+  border: 2px solid #000;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  color: #000;
+  outline: none;
+  min-width: 160px;
+  height: 40px;             /* ukuran tinggi disamakan */
+  line-height: 1.2;         /* line-height disesuaikan */
+  box-sizing: border-box;   /* agar padding + border masuk ke total size */
+  text-align: center;
+  user-select: text;
+  transition: border-color 0.3s ease, background-color 0.5s ease, color 0.5s ease;
+  }
+
+  /* versi dark mode */
+  body.dark input[type="date"],
+  body.dark select {
+    background: #222;
+    border-color: #eee;
+    color: #eee;
+  }
+.submit-btn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1.2rem;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  height: 40px;
+  font-weight: 800;
+}
+.submit-btn:hover {
+  background-color: #333;
+}
+body.dark .submit-btn {
+  background-color: #fff;
+  color: #000;
+}
+body.dark .submit-btn:hover {
+  background-color: #ddd;
+}
+
+
+.iso-table {
+  width: 100%;
+  max-width: 900px;
+  border-collapse: collapse;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  color: var(--text-light);
+  background: transparent;
+  table-layout: fixed;
+  word-wrap: break-word;
+  transition: color 0.5s ease;
+  margin-top: 18px;
+}
+
+body.dark .iso-table {
+  color: var(--text-dark);
+}
+
+/* THEAD */
+.iso-table thead th {
+  text-align: center;
+  font-weight: 700;
+  padding: 10px 7px;
+  color: white;
+  background-color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.dark .iso-table thead th {
+  color: black;
+  background-color: #fff;
+}
+
+/* Rounded corners only for THEAD */
+.iso-table thead th:first-child {
+  border-top-left-radius: 15px;
+}
+.iso-table thead th:last-child {
+  border-top-right-radius: 15px;
+}
+
+/* TFOOT */
+.iso-table tfoot th {
+  background-color: #000;
+  color: white;
+  padding: 10px 7px;
+  font-weight: 700;
+  text-align: center;
+}
+body.dark .iso-table tfoot th {
+  background-color: #fff;
+  color: black;
+}
+
+/* Rounded corners only for TFOOT */
+.iso-table tfoot tr th:first-child {
+  border-bottom-left-radius: 15px;
+}
+.iso-table tfoot tr th:last-child {
+  border-bottom-right-radius: 15px;
+}
+
+.iso-table tbody tr {
+  background: var(--table-row-bg-light);
+  box-shadow: 0 1px 3px rgb(60 60 67 / 0.3);
+  transition: background-color 0.3s ease;
+  cursor: default;
+}
+body.dark .iso-table tbody tr {
+  background: var(--table-row-bg-dark);
+  box-shadow: 0 1px 3px rgb(255 255 255 / 0.1);
+}
+.iso-table tbody tr:hover {
+  background: var(--table-row-hover-light);
+}
+body.dark .iso-table tbody tr:hover {
+  background: var(--table-row-hover-dark);
+}
+
+.iso-table td {
+  padding: 12px 8px;
+  border: 1px solid var(--table-border-light);
+  font-weight: 400;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.dark .iso-table td {
+  border: 1px solid var(--table-border-dark);
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+  .filter-container {
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 100%;
+  }
+  input[type="date"],
+  select {
+    min-width: 100%;
+  }
+  .iso-table th,
+  .iso-table td {
+    font-size: 12px;
+    padding: 8px 4px;
+    white-space: normal;
+  }
+  .iso-table {
+    font-size: 13px;
+  }
+}
+  /* From Uiverse.io by chicogale */ 
+.cyber-toggle-wrapper {
+  display: inline-flex;
+  flex-direction: row; /* supaya label sejajar kanan kiri */
+  justify-content: center; /* tengah secara horizontal */
+  align-items: center;
+  position: fixed;
+  bottom: 10px; /* jarak dari bawah layar */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0;
+  gap: 12px; /* jarak horizontal antara toggle dan tulisan */
+  background: transparent;
+  z-index: 1000;
+}
+.cyber-toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cyber-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;  /* dari 64px ke 40px */
+  height: 20px; /* dari 32px ke 20px */
+  cursor: pointer;
+}
+
+.cyber-toggle-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 0 4px rgba(0, 0, 0, 0.8);
+  transition: all 0.4s cubic-bezier(0.3, 1.5, 0.7, 1);
+}
+
+.cyber-toggle-track::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 14px;
+  background: #222;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+  z-index: 0;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-track-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #ff0000, #ffa500);
+  opacity: 0;
+  border-radius: 16px;
+  z-index: 1;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-thumb {
+  position: absolute;
+  width: 14px;  /* dari 24px ke 14px */
+  height: 14px; /* dari 24px ke 14px */
+  top: 3px;     /* sesuaikan posisi vertikal */
+  left: 3px;    /* posisi awal thumb */
+  background: #151515;
+  border-radius: 50%;
+  z-index: 2;
+  transition: all 0.4s cubic-bezier(0.3, 1.5, 0.7, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-toggle-thumb-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.1),
+    transparent 70%
+  );
+  z-index: 1;
+}
+
+.cyber-toggle-thumb-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 70% 70%,
+    rgba(0, 0, 0, 0.2),
+    transparent 70%
+  );
+  z-index: 1;
+}
+
+.cyber-toggle-thumb-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  opacity: 0.7;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.cyber-toggle-thumb-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: #555;
+  transition:
+    fill 0.4s ease,
+    transform 0.4s ease;
+}
+
+.cyber-toggle-track-dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 10px;
+  z-index: 1;
+}
+
+.cyber-toggle-track-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #444;
+  margin-left: 3px;
+  opacity: 0.5;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cyber-toggle-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #ffa500; /* ganti dari biru ke orange */
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(1px);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 4px rgba(255, 165, 0, 0.8); /* orange shadow */
+}
+
+.cyber-toggle-particle:nth-child(1) {
+  top: 15%;
+  right: 20%;
+}
+
+.cyber-toggle-particle:nth-child(2) {
+  top: 45%;
+  right: 30%;
+}
+
+.cyber-toggle-particle:nth-child(3) {
+  top: 25%;
+  right: 40%;
+}
+
+.cyber-toggle-particle:nth-child(4) {
+  top: 60%;
+  right: 15%;
+}
+
+.cyber-toggle-labels {
+  display: flex;
+  flex-direction: row; /* horizontal */
+  gap: 10px; /* jarak spasi antar label */
+  width: auto;
+  margin-top: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.cyber-toggle-label-off {
+  color: #555;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-label-on {
+  color: #555;
+  transition: all 0.4s ease;
+}
+
+/* Stati attivi */
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-track-glow {
+  opacity: 0.5;
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-thumb {
+  left: calc(100% - 17px); /* sesuaikan dengan ukuran kecil */
+  background: #222;
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-thumb-icon {
+  transform: rotate(360deg);
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-thumb-icon svg {
+  fill: #ffa500;
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-track-dot {
+  background: #ffa500; /* ganti dari biru ke orange */
+  box-shadow: 0 0 4px #ffa500; /* ganti dari biru ke orange */
+  opacity: 1;
+}
+
+.cyber-toggle-checkbox:checked ~ .cyber-toggle-labels .cyber-toggle-label-on {
+color: #ffa500; /* ganti dari biru ke orange */
+  text-shadow: 0 0 5px rgba(255, 165, 0, 0.5); /* ganti dari biru ke orange */
+}
+
+.cyber-toggle-checkbox:not(:checked)
+  ~ .cyber-toggle-labels
+  .cyber-toggle-label-off {
+  color: #aaa;
+}
+
+/* Animazione particelle quando attivo */
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-particle {
+  opacity: 1;
+  animation: cyber-toggle-float 3s infinite alternate;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+/* Effetto hover */
+.cyber-toggle:hover .cyber-toggle-track::before {
+  background: #272727;
+}
+
+.cyber-toggle:hover .cyber-toggle-thumb {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle:hover .cyber-toggle-track-glow {
+  opacity: 0.7;
+}
+
+/* Effetto focus per accessibilità */
+.cyber-toggle-checkbox:focus + .cyber-toggle {
+  outline: none;
+}
+
+.cyber-toggle-checkbox:focus + .cyber-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 165, 0, 0.5);
+  opacity: 0.5;
+}
+
+/* === OFF STATE (putih dengan border hitam) === */
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-track {
+  background: white;
+  border: 2px solid black;
+  box-shadow: none;
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-track::before {
+  background: white;
+  box-shadow: none;
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-thumb {
+  background: white;
+  border: 2px solid black;
+  box-shadow: none;
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-thumb-icon svg {
+  fill: #000; /* Ikon hitam */
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-track-dot {
+  background: #000; /* Titik hitam */
+  box-shadow: none;
+}
+
+@keyframes cyber-toggle-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+/* Subtitle */
+    .subtitle {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+      transition: color 0.5s ease;
+      user-select: none;
+      font-family: 'Montserrat';
+    }
+    body.dark .subtitle {
+      color: #bbb;
+    }
+  .spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #333;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+.login-header img {
+  width: 400px;
+  max-width: 100%;
+  margin-bottom: 50px;
+  display: block;
+  margin-left: auto;    /* biar center horizontal */
+  margin-right: auto;   /* biar center horizontal */
+  border-radius: 25px;
+  transition: filter 0.5s ease;
+  user-select: none;
+}
+body.dark .login-header img:hover {
+  filter: drop-shadow(0 0 10px #ffa500);
+  cursor: pointer; /* mouse pointer saat hover */
+}
+@media (max-width: 768px) {
+  #laporanTable {
+    font-size: 12px !important;
+  }
+
+  #laporanTable th,
+  #laporanTable td {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #laporanTable {
+    font-size: 11px !important;
+  }
+
+  #laporanTable th,
+  #laporanTable td {
+    padding: 3px 4px !important;
+    font-size: 9px !important;
+  }
+}
+  
+/* Light mode styling */
+.total-footer {
+    background-color: #1e1e1e; /* dark mode background */
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Dark mode styling */
+body.dark .total-footer {
+  background-color: #f0f0f0; /* light mode background */
+  color: #000;
+  font-weight: bold;
+}
+  .edit-btn {
+  background-color: Red;
+  color: white;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+.modalEditFull {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modalContentFull {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modalContentFull h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: #222;
+}
+
+.modalContentFull form label {
+  display: block;
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #444;
+  text-align: center;
+}
+
+.modalContentFull form input,
+.modalContentFull form select {
+  width: 100%;
+  padding: 10px 14px;
+  margin-top: 6px;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  color: #222;
+  text-align: center;
+  transition: all 0.2s ease;
+  appearance: none;
+  box-sizing: border-box;
+}
+
+.modalContentFull form select {
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="gray" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.modalContentFull form input:focus,
+.modalContentFull form select:focus {
+  outline: none;
+  border-color: #4caf50;
+  background: #ffffff;
+}
+
+.modalActionsFull {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.modalActionsFull button {
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#btnCancelFull {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.modalActionsFull button[type="submit"] {
+  background: #4caf50;
+  color: white;
+}
+
+.modalActionsFull button:hover {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+    #laporanTable col:nth-child(2) {
+    text-align: left;
+  }
+  #laporanTable tbody tr td:nth-child(2) {
+    text-align: left;
+  }
+  #notifikasi {
+  transition: opacity 0.3s ease;
+}
+
+
+</style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="login-header">
+    <img id="header-img" src="https://i.imgur.com/t5pupdt.png" alt="Login Header" draggable="false" />
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-container">
+    <input type="date" id="filterTanggal" />
+     <select id="filterOutlet">
+      <option value="">-- Semua Outlet --</option>
+      <option value="UIN">UIN</option>
+      <option value="UMM">UMM</option>
+      <option value="PRODUKSI">PRODUKSI</option>
+    </select>
+    <button id="submitOutlet" class="submit-btn">Submit Data</button>
+    <button id="resetFilter" class="submit-btn" style="background-color: crimson; color: #fff">Reset Data</button>
+    <button id="btnCetakStruk" class="submit-btn">Cetak Data</button>
+  </div>
+
+  <!-- Tabel Data -->
+  <table class="iso-table" id="laporanTable">
+    <colgroup>
+    <col style="width: 10%;"> <!-- Tanggal -->
+    <col style="width: 20%;"> <!-- Nama Bahan -->
+    <col style="width: 5%;">  <!-- Qty -->
+    <col style="width: 10%;">  <!-- Satuan -->
+    <col style="width: 12%;"> <!-- Harga Jual -->
+    <col style="width: 13%;"> <!-- Harga Total -->
+    <col style="width: 7%;"> <!-- Outlet -->
+    <col style="width: 7%;"> <!-- Metode Pembayaran -->
+    <col style="width: 10%;"> <!-- Aksi -->
+  </colgroup>
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Nama Bahan</th>
+        <th>Qty</th>
+        <th>Satuan</th>
+        <th>Harga Jual</th>
+        <th>Harga Total</th>
+        <th>Outlet</th>
+        <th>M.P</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+      <tfoot id="totalRow" style="display: none;">
+        <tr>
+          <td colspan="9" class="total-footer" style="text-align: center;">
+            <strong>Total Cash: <span id="totalCash">Rp0</span> | Total QRIS: <span id="totalQris">Rp0</span> | Total Semua: <span id="totalHarga">Rp0</span></strong>
+          </td>
+        </tr>
+    </tfoot>
+  </table>
+<!-- Modal Edit Data Lengkap -->
+<div id="modalEditFull" class="modalEditFull" style="display:none;">
+  <div class="modalContentFull">
+    <h3>Edit Metode Pembayaran</h3>
+    <form id="formEditFull">
+      <label for="inputTanggal">Tanggal:</label>
+      <input type="date" id="inputTanggal" readonly/>
+
+      <label for="inputNamaBahan">Nama Bahan:</label>
+      <input type="text" id="inputNamaBahan" readonly />
+
+      <label for="inputQty">Qty:</label>
+      <input type="number" id="inputQty" step="0.01" min="0" required />
+
+      <label for="inputSatuan">Satuan:</label>
+      <input type="text" id="inputSatuan" readonly />
+
+      <label for="inputHargaJual">Harga Jual:</label>
+      <input type="number" id="inputHargaJual" min="0" readonly />
+      
+      <label for="inputHargaTotal">Harga Total:</label>
+      <input type="number" id="inputHargaTotal" min="0" readonly />
+
+      <label for="inputOutlet">Outlet:</label>
+      <input type="text" id="inputOutlet" readonly />
+
+      <label for="inputMetodePembayaran">Metode Pembayaran:</label>
+      <select id="inputMetodePembayaran" required>
+        <option value="CASH">CASH</option>
+        <option value="QRIS">QRIS</option>
+      </select>
+
+      <div class="modalActionsFull">
+        <button type="button" id="btnCancelFull">Batal</button>
+        <button type="submit">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="notifikasi" style="
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #4caf50;
+  color: white;
+  padding: 16px 28px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  max-width: 80%;">
+</div>
+  
+  <!-- Toggle Dark Mode -->
+<div class="cyber-toggle-wrapper">
+  <input class="cyber-toggle-checkbox" id="mode-toggle" type="checkbox" />
+  <label class="cyber-toggle" for="mode-toggle">
+    <div class="cyber-toggle-track">
+      <div class="cyber-toggle-track-glow"></div>
+      <div class="cyber-toggle-track-dots">
+        <span class="cyber-toggle-track-dot"></span>
+        <span class="cyber-toggle-track-dot"></span>
+        <span class="cyber-toggle-track-dot"></span>
+      </div>
+    </div>
+    <div class="cyber-toggle-thumb">
+      <div class="cyber-toggle-thumb-shadow"></div>
+      <div class="cyber-toggle-thumb-highlight"></div>
+      <div class="cyber-toggle-thumb-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M16.5 12c0-2.48-2.02-4.5-4.5-4.5s-4.5 2.02-4.5 4.5 2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5zm-4.5 7.5c-4.14 0-7.5-3.36-7.5-7.5s3.36-7.5 7.5-7.5 7.5 3.36 7.5 7.5-3.36 7.5-7.5 7.5zm0-16.5c-4.97 0-9 4.03-9 9h-3l3.89 3.89.07.14 4.04-4.03h-3c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42c1.63 1.63 3.87 2.64 6.36 2.64 4.97 0 9-4.03 9-9s-4.03-9-9-9z"
+          ></path>
+        </svg>
+      </div>
+    </div>
+    <div class="cyber-toggle-particles">
+      <span class="cyber-toggle-particle"></span>
+      <span class="cyber-toggle-particle"></span>
+      <span class="cyber-toggle-particle"></span>
+      <span class="cyber-toggle-particle"></span>
+    </div>
+  </label>
+  <div class="cyber-toggle-labels">
+    <span class="cyber-toggle-label-off">LIGHT </span>
+    <span class="cyber-toggle-label-on">  DARK</span>  
+</div>
+<script>
+  // =========================
+  // 🔁 VARIABEL & ELEMEN DASAR
+  // =========================
+  let dataOutput = [];
+  let filteredData = [];
+  const tbody = document.querySelector("#laporanTable tbody");
+  const filterTanggal = document.getElementById("filterTanggal");
+  const filterOutlet = document.getElementById("filterOutlet");
+  const toggle = document.getElementById("mode-toggle");
+  const body = document.body;
+  const headerImg = document.getElementById("header-img");
+  const totalRow = document.getElementById("totalRow");
+  const totalHargaCell = document.getElementById("totalHarga");
+
+  const lightImg = "https://i.imgur.com/t5pupdt.png";
+  const darkImg = "https://i.imgur.com/31StRoK.png";
+
+  // =========================
+  // 💵 FORMAT CURRENCY
+  // =========================
+  function formatCurrency(num) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
+  }
+
+  // =========================
+  // 🧮 RENDER TABEL LAPORAN
+  // =========================
+  function renderTable(data) {
+    tbody.innerHTML = "";
+    if (data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='9'>Data tidak ditemukan</td></tr>";
+      totalRow.style.display = "none";
+      return;
+    }
+
+    let totalCash = 0;
+    let totalQris = 0;
+    let totalHarga = 0;
+
+    data.forEach((row, index) => {
+      if (row.metodePembayaran?.toLowerCase() === 'cash') {
+        totalCash += row.hargaTotal;
+      } else if (row.metodePembayaran?.toLowerCase() === 'qris') {
+        totalQris += row.hargaTotal;
+      }
+
+      totalHarga += row.hargaTotal;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.tanggal}</td>
+        <td>${row.namaBahan}</td>
+        <td>${Number.isInteger(row.qty) ? row.qty : parseFloat(row.qty).toFixed(2)}</td>
+        <td>${row.satuan}</td>
+        <td>${formatCurrency(row.hargaJual)}</td>
+        <td>${formatCurrency(row.hargaTotal)}</td>
+        <td>${row.outlet}</td>
+        <td>${row.metodePembayaran}</td>
+        <td><button onclick="openEditFull(${index})" class="edit-btn">Edit</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Tampilkan total di bawah tabel
+    document.getElementById("totalCash").textContent = formatCurrency(totalCash);
+    document.getElementById("totalQris").textContent = formatCurrency(totalQris);
+    totalHargaCell.innerHTML = `<span style="font-weight: 700;">${formatCurrency(totalHarga)}</span>`;
+    totalRow.style.display = "";
+  }
+  
+function showNotif(pesan, warna = "#4caf50") {
+  const notif = document.getElementById("notifikasi");
+  notif.textContent = pesan;
+  notif.style.backgroundColor = warna;
+  notif.style.display = "block";
+  notif.style.opacity = "1";
+
+  setTimeout(() => {
+    notif.style.opacity = "0";
+    setTimeout(() => {
+      notif.style.display = "none";
+    }, 300); // waktu fade-out
+  }, 2500); // tampil 2.5 detik
+}
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let currentEditIndexFull = null;
+
+function openEditFull(index) {
+  currentEditIndexFull = index;
+  const data = filteredData[index]; // Ganti dari dataOutput jadi filteredData
+
+  // Isi form edit
+  document.getElementById("inputTanggal").value = normalizeDate(data.tanggal);
+  document.getElementById("inputNamaBahan").value = data.namaBahan;
+  document.getElementById("inputQty").value = data.qty;
+  document.getElementById("inputSatuan").value = data.satuan;
+  document.getElementById("inputHargaJual").value = data.hargaJual;
+  document.getElementById("inputHargaTotal").value = data.hargaTotal;
+  document.getElementById("inputOutlet").value = data.outlet;
+  document.getElementById("inputMetodePembayaran").value = data.metodePembayaran || "Cash";
+
+  document.getElementById("modalEditFull").style.display = "flex";
+}
+
+// Batal tutup modal
+document.getElementById("btnCancelFull").addEventListener("click", () => {
+  document.getElementById("modalEditFull").style.display = "none";
+  currentEditIndexFull = null;
+});
+
+// Submit form update metode pembayaran saja
+document.getElementById("formEditFull").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (currentEditIndexFull === null) return;
+
+  const data = filteredData[currentEditIndexFull];
+
+  const originalIndex = dataOutput.findIndex(item =>
+    normalizeDate(item.tanggal) === normalizeDate(data.tanggal) &&
+    item.namaBahan === data.namaBahan &&
+    item.outlet === data.outlet
+  );
+
+  const payload = {
+    tanggal: normalizeDate(data.tanggal),
+    outlet: data.outlet,
+    namaBahan: data.namaBahan,
+    metodePembayaran: document.getElementById("inputMetodePembayaran").value,
+    namaStaff: document.getElementById("inputNamaStaff")?.value || "",
+    qty: parseFloat(document.getElementById("inputQty").value) || 0,
+    satuan: document.getElementById("inputSatuan").value || "",
+    hargaJual: parseFloat(document.getElementById("inputHargaJual").value) || 0,
+    hargaTotal: parseFloat(document.getElementById("inputHargaTotal").value) || 0
+  };
+
+  const sendBtn = e.target.querySelector('button[type="submit"]');
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Menyimpan...";
+
+  try {
+    const response = await fetch("https://distinct-flint-fig.glitch.me/api/update-metode-pembayaran", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errMsg = await response.text();
+      throw new Error(`Gagal mengirim data. Status: ${response.status}. ${errMsg}`);
+    }
+
+    const resJson = await response.json();
+
+    if (!resJson.success) {
+      throw new Error(resJson.message || "Gagal menyimpan data");
+    }
+
+    // Update data lokal
+    dataOutput[originalIndex].metodePembayaran = payload.metodePembayaran;
+    dataOutput[originalIndex].qty = payload.qty;
+    dataOutput[originalIndex].satuan = payload.satuan;
+    dataOutput[originalIndex].hargaJual = payload.hargaJual;
+    dataOutput[originalIndex].hargaTotal = payload.hargaTotal;
+    dataOutput[originalIndex].namaStaff = payload.namaStaff;
+
+    applyFilter(); // Refresh tampilan
+    document.getElementById("modalEditFull").style.display = "none";
+    currentEditIndexFull = null;
+
+    showNotif("✅ Data berhasil diperbarui!");
+  } catch (error) {
+    showNotif("❌ " + error.message, "#f44336"); // merah
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Simpan";
+  }
+});
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // =========================
+  // 🗓️ NORMALISASI TANGGAL
+  // =========================
+function normalizeDate(input) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+    const [dd, mm, yyyy] = input.split("/");
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+
+  return ""; // fallback kalau format gak dikenali
+}
+
+
+  // =========================
+  // 🔍 FILTER DATA
+  // =========================
+  function applyFilter() {
+  const tanggal = filterTanggal.value;
+  const outlet = filterOutlet.value.trim().toLowerCase();
+
+  filteredData = [...dataOutput]; // ini baru
+  if (tanggal) {
+    filteredData = filteredData.filter(item => normalizeDate(item.tanggal) === tanggal);
+  }
+  if (outlet) {
+    filteredData = filteredData.filter(item => item.outlet?.toLowerCase() === outlet);
+  }
+
+  renderTable(filteredData); // render pakai filteredData
+}
+
+  // =========================
+  // 📦 FETCH DATA DARI SERVER
+  // =========================
+  async function fetchOutputStok() {
+    try {
+      const response = await fetch("https://distinct-flint-fig.glitch.me/api/output-stok-harian?action=getOutputStok");
+      if (!response.ok) throw new Error("Gagal mengambil data dari server");
+
+      const json = await response.json();
+      if (!json.success) {
+        alert("Gagal load data: " + (json.message || "Tidak diketahui"));
+        return;
+      }
+
+      if (!Array.isArray(json.data)) throw new Error("Format data tidak valid");
+      dataOutput = json.data;
+
+      tbody.innerHTML = "<tr><td colspan='9'>Silakan pilih tanggal dan outlet lalu klik submit.</td></tr>";
+      totalRow.style.display = "none";
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Terjadi kesalahan saat mengambil data output stok");
+    }
+  }
+
+  // =========================
+  // 🖨️ CETAK STRUK
+  // =========================
+  document.getElementById("btnCetakStruk").addEventListener("click", () => {
+    const rows = document.querySelectorAll("#laporanTable tbody tr");
+    const dataStruk = [];
+
+    rows.forEach(row => {
+      const cols = row.querySelectorAll("td");
+      if (cols.length >= 8) {
+        const nama = cols[1].innerText.trim();
+        const qty = parseInt(cols[2].innerText.trim());
+        const harga = parseInt(cols[4].innerText.replace(/[^\d]/g, ""));
+        const total = parseInt(cols[5].innerText.replace(/[^\d]/g, ""));
+        const metode = cols[7].innerText.trim().toLowerCase();
+        dataStruk.push({ nama, qty, harga, total, metode });
+      }
+    });
+
+    const tanggal = filterTanggal.value || new Date().toISOString().split("T")[0];
+    const outlet = filterOutlet.value || "Outlet Default";
+
+    localStorage.setItem("strukLaporan", JSON.stringify(dataStruk));
+    localStorage.setItem("filterTanggal", tanggal);
+    localStorage.setItem("filterOutlet", outlet);
+    window.open("print-struk.html", "_blank");
+  });
+
+  // =========================
+  // 🌗 DARK MODE HANDLER
+  // =========================
+  function initMode() {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+      body.classList.add("dark");
+      toggle.checked = true;
+      headerImg.src = darkImg;
+    } else {
+      body.classList.remove("dark");
+      toggle.checked = false;
+      headerImg.src = lightImg;
+    }
+  }
+
+  toggle.addEventListener("change", () => {
+    if (toggle.checked) {
+      body.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      headerImg.src = darkImg;
+    } else {
+      body.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      headerImg.src = lightImg;
+    }
+  });
+
+  headerImg.addEventListener("click", () => {
+    window.location.href = "menu.html";
+  });
+
+  // =========================
+  // 📅 EVENT FILTER
+  // =========================
+  filterTanggal.addEventListener("change", () => {
+    tbody.innerHTML = "<tr><td colspan='9'>Silakan klik submit untuk menampilkan data.</td></tr>";
+    totalRow.style.display = "none";
+  });
+
+  filterOutlet.addEventListener("input", () => {
+    tbody.innerHTML = "<tr><td colspan='9'>Silakan klik submit untuk menampilkan data.</td></tr>";
+    totalRow.style.display = "none";
+  });
+
+  document.getElementById("resetFilter").addEventListener("click", () => {
+    filterTanggal.value = "";
+    filterOutlet.value = "";
+    tbody.innerHTML = "<tr><td colspan='9'>Silakan pilih tanggal dan outlet lalu klik submit.</td></tr>";
+    totalRow.style.display = "none";
+  });
+
+  document.getElementById("submitOutlet").addEventListener("click", () => {
+    applyFilter();
+  });
+  
+    // =========================
+    // 🔄 HITUNG ULANG TOTAL SAAT QTY / HARGA BERUBAH
+    // =========================
+    document.getElementById("inputQty").addEventListener("input", updateHargaTotal);
+    document.getElementById("inputHargaJual").addEventListener("input", updateHargaTotal);
+
+    function updateHargaTotal() {
+      const qty = parseFloat(document.getElementById("inputQty").value) || 0;
+      const hargaJual = parseFloat(document.getElementById("inputHargaJual").value) || 0;
+      const total = qty * hargaJual;
+      document.getElementById("inputHargaTotal").value = Math.round(total);
+    }
+
+  // =========================
+  // 🚀 INISIALISASI SAAT LOAD
+  // =========================
+  window.addEventListener("DOMContentLoaded", () => {
+    initMode();
+    fetchOutputStok();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Form Input</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg-light: #ffffff;
+  --bg-dark: #121212;
+  --grid-light: #dddddd;
+  --grid-dark: #222222;
+  --text-light: #000000;
+  --text-dark: #eeeeee;
+  --input-bg-light: #ffffff;
+  --input-bg-dark: #222222;
+  --input-border-light: #000000;
+  --input-border-dark: #eeeeee;
+  --button-light-bg: #000000;
+  --button-dark-bg: #eeeeee;
+  --button-light-text: #ffffff;
+  --button-dark-text: #000000;
+  --popup-bg-light: #ffffff;
+  --popup-bg-dark: #2a2a2a;
+  --subtitle-light: #666;
+  --subtitle-dark: #bbb;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bg-light);
+  background-image: linear-gradient(to right, var(--grid-light) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--grid-light) 1px, transparent 1px);
+  background-size: 30px 30px;
+  color: var(--text-light);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+body.dark {
+  background-color: var(--bg-dark);
+  background-image: linear-gradient(to right, var(--grid-dark) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--grid-dark) 1px, transparent 1px);
+  color: var(--text-dark);
+}
+
+.subtitle {
+  text-align: center;
+  font-weight: 400;
+  margin: 1rem 0;
+  font-size: 14px;
+  color: var(--subtitle-light);
+margin-top : 0px;
+}
+
+body.dark .subtitle {
+  color: var(--subtitle-dark);
+}
+
+.container {
+  background: var(--bg-light);
+  color: var(--text-light);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  max-width: 600px;
+  width: 100%;
+  transition: 0.5s ease;
+}
+
+body.dark .container {
+  background: #1e1e1e;
+  color: var(--text-dark);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-group {
+  flex: 1 1 38%;
+  display: flex;
+  flex-direction: column;
+
+}
+.form-group.full {
+  flex: 1 1 100%;
+}
+
+label {
+  font-weight: 400;
+  margin-bottom: 10px;
+text-align : center;
+}
+
+input, select, textarea {
+  font-family: 'Montserrat';
+  padding: 0.6rem;
+  font-size: 16px;
+  border-radius: 20px;
+  border: 2px solid var(--input-border-light);
+  background: var(--input-bg-light);
+  color: var(--text-light);
+  text-align: center;
+  transition: 0.3s;
+}
+
+body.dark input,
+body.dark select,
+body.dark textarea {
+  background: var(--input-bg-dark);
+  color: var(--text-dark);
+  border-color: var(--input-border-dark);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #ffa500;
+  box-shadow: 0 0 5px #ffa500aa;
+}
+
+.button, #loginBtn {
+  margin-top: 1rem;
+  padding: 0.7rem 1.5rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 100px;
+  background-color: var(--button-light-bg);
+  color: var(--button-light-text);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+body.dark .button, body.dark #loginBtn {
+  background-color: var(--button-dark-bg);
+  color: var(--button-dark-text);
+}
+
+.button:hover, #loginBtn:hover {
+  opacity: 0.9;
+}
+
+.toggle-mode {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-weight: bold;
+  font-family: inherit;
+  color: inherit;
+}
+
+.header-img {
+  display: block;
+  margin: 0 auto 1rem;
+  width: 340px;
+  max-width: 50%;
+  border-radius: 25px;
+  transition: filter 0.5s ease;
+  user-select: none;
+}
+body.dark .header img:hover {
+  filter: drop-shadow(0 0 10px #ffa500);
+  cursor: pointer; /* opsional, biar mouse berubah jadi pointer */
+}
+.popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: var(--popup-bg-light);
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  color: var(--text-light);
+}
+
+body.dark .popup-content {
+  background: var(--popup-bg-dark);
+  color: var(--text-dark);
+}
+
+.popup-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-around;
+}
+
+.popup-buttons button {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.popup-buttons .send {
+  background: #28a745;
+  color: white;
+}
+
+.popup-buttons .cancel {
+  background: #dc3545;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .form-group {
+    flex: 1 1 100%;
+  }
+}
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* jarak antar tombol */
+  flex-wrap: nowrap; /* jangan sampai tombol pindah baris */
+  align-items: center; /* vertical center */
+  padding: 0 10px;
+}
+    /* Button */
+    .animated-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+       padding: 0.6rem;
+     border: 4px solid transparent;
+      font-family: 'Montserrat';
+      font-size: 16px;
+      background-color: #fff;
+      border-radius: 100px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 0 0 0 2px #000;
+      cursor: pointer;
+      overflow: hidden;
+      transition:
+      background-color 0.5s ease,
+      color 0.5s ease,
+      box-shadow 0.5s ease;
+      user-select: none;
+      min-width: 180px;
+      margin: 0 auto;
+    }
+    body.dark .animated-button {
+      background-color: #121212;
+      color: #eee;
+      box-shadow: 0 0 0 2px #eee;
+    }
+
+    .animated-button .circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 15px;
+      background-color: #da0000;
+      border-radius: 50%;
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+      pointer-events: none;
+    }
+    body.dark .animated-button .circle {
+      background-color: #da0000;
+    }
+
+    .animated-button .text {
+      position: relative;
+      z-index: 1;
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+      user-select: none;
+      
+    }
+
+    .animated-button:hover {
+      box-shadow: 0 0 0 12px transparent;
+      color: #fff;
+      background-color: #da0000;
+      border-radius: 12px;
+    }
+    body.dark .animated-button:hover {
+      background-color: #da0000;
+      color: #fff;
+      box-shadow: 0 0 0 12px transparent;
+      border-radius: 12px;
+    }
+
+    .animated-button:active {
+      scale: 0.95;
+      box-shadow: 0 0 0 4px #000;
+    }
+    body.dark .animated-button:active {
+      box-shadow: 0 0 0 4px #eee;
+    }
+
+    .animated-button:hover .circle {
+      width: 220px;
+      height: 220px;
+      opacity: 1;
+    }
+    /* Menu Utama */
+.menu-btn:hover {
+  background-color: #187498;
+  color: #fff;
+}
+body.dark .menu-btn:hover {
+  background-color: #187498;
+  color: #fff;
+}
+.menu-btn .circle {
+  background-color: #187498;
+}
+body.dark .menu-btn .circle {
+  background-color: #187498;
+}
+
+/* Kirim */
+.kirim-btn:hover {
+  background-color: #16610E;
+  color: #fff;
+}
+body.dark .kirim-btn:hover {
+  background-color: #16610E;
+  color: #fff;
+}
+.kirim-btn .circle {
+  background-color: #16610E;
+}
+body.dark .kirim-btn .circle {
+  background-color: #16610E;
+}
+
+/* Logout */
+.logout-btn:hover {
+  background-color: #CB0404;
+  color: #fff;
+}
+body.dark .logout-btn:hover {
+  background-color: #CB0404;
+  color: #fff;
+}
+.logout-btn .circle {
+  background-color: #CB0404;
+}
+body.dark .logout-btn .circle {
+  background-color: #CB0404;
+}
+
+@media (max-width: 768px) {
+  .button-wrapper {
+    gap: 8px;
+    padding: 5px;
+  }
+
+  .animated-button {
+    flex: 1; /* tombol berbagi ruang sama rata */
+    max-width: 120px; /* batas maksimal lebar tombol */
+    height: 40px; /* tinggi tetap */
+    font-size: 0.8rem; /* ukuran font tetap */
+    padding: 0;
+    min-width: unset; /* hilangkan min-width agar bisa mengecil */
+  }
+}
+
+@media (max-width: 480px) {
+  .animated-button {
+    max-width: 100px;
+    height: 36px;
+    font-size: 0.75rem;
+  }
+}
+
+    /* Copyright */
+    .copyright {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #888;
+      user-select: none;
+      transition: color 0.5s ease;
+text-align : center;
+    }
+    body.dark .copyright {
+      color: #666;
+    }
+    input::placeholder {
+      color: #666;
+      user-select: none;
+      font-size : 16px;
+    }
+    body.dark input::placeholder {
+      color: #aaa;
+    }
+
+/* From Uiverse.io by chicogale */ 
+.cyber-toggle-wrapper {
+  display: inline-flex;
+  flex-direction: row; /* supaya label sejajar kanan kiri */
+  justify-content: center; /* tengah secara horizontal */
+  align-items: center;
+  position: fixed;
+  bottom: 10px; /* jarak dari bawah layar */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0;
+  gap: 12px; /* jarak horizontal antara toggle dan tulisan */
+  background: transparent;
+  z-index: 1000;
+}
+.cyber-toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cyber-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;  /* dari 64px ke 40px */
+  height: 20px; /* dari 32px ke 20px */
+  cursor: pointer;
+}
+
+.cyber-toggle-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 0 4px rgba(0, 0, 0, 0.8);
+  transition: all 0.4s cubic-bezier(0.3, 1.5, 0.7, 1);
+}
+
+.cyber-toggle-track::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 14px;
+  background: #222;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+  z-index: 0;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-track-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #ff0000, #ffa500);
+  opacity: 0;
+  border-radius: 16px;
+  z-index: 1;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-thumb {
+  position: absolute;
+  width: 14px;  /* dari 24px ke 14px */
+  height: 14px; /* dari 24px ke 14px */
+  top: 3px;     /* sesuaikan posisi vertikal */
+  left: 3px;    /* posisi awal thumb */
+  background: #151515;
+  border-radius: 50%;
+  z-index: 2;
+  transition: all 0.4s cubic-bezier(0.3, 1.5, 0.7, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.cyber-toggle-thumb-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.1),
+    transparent 70%
+  );
+  z-index: 1;
+}
+
+.cyber-toggle-thumb-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 70% 70%,
+    rgba(0, 0, 0, 0.2),
+    transparent 70%
+  );
+  z-index: 1;
+}
+
+.cyber-toggle-thumb-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  opacity: 0.7;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.cyber-toggle-thumb-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: #555;
+  transition:
+    fill 0.4s ease,
+    transform 0.4s ease;
+}
+
+.cyber-toggle-track-dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 10px;
+  z-index: 1;
+}
+
+.cyber-toggle-track-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #444;
+  margin-left: 3px;
+  opacity: 0.5;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cyber-toggle-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #ffa500; /* ganti dari biru ke orange */
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(1px);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 4px rgba(255, 165, 0, 0.8); /* orange shadow */
+}
+
+.cyber-toggle-particle:nth-child(1) {
+  top: 15%;
+  right: 20%;
+}
+
+.cyber-toggle-particle:nth-child(2) {
+  top: 45%;
+  right: 30%;
+}
+
+.cyber-toggle-particle:nth-child(3) {
+  top: 25%;
+  right: 40%;
+}
+
+.cyber-toggle-particle:nth-child(4) {
+  top: 60%;
+  right: 15%;
+}
+
+.cyber-toggle-labels {
+  display: flex;
+  flex-direction: row; /* horizontal */
+  gap: 10px; /* jarak spasi antar label */
+  width: auto;
+  margin-top: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.cyber-toggle-label-off {
+  color: #555;
+  transition: all 0.4s ease;
+}
+
+.cyber-toggle-label-on {
+  color: #555;
+  transition: all 0.4s ease;
+}
+
+/* Stati attivi */
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-track-glow {
+  opacity: 0.5;
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-thumb {
+  left: calc(100% - 17px); /* sesuaikan dengan ukuran kecil */
+  background: #222;
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-thumb-icon {
+  transform: rotate(360deg);
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-thumb-icon svg {
+  fill: #ffa500;
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-track-dot {
+  background: #ffa500; /* ganti dari biru ke orange */
+  box-shadow: 0 0 4px #ffa500; /* ganti dari biru ke orange */
+  opacity: 1;
+}
+
+.cyber-toggle-checkbox:checked ~ .cyber-toggle-labels .cyber-toggle-label-on {
+color: #ffa500; /* ganti dari biru ke orange */
+  text-shadow: 0 0 5px rgba(255, 165, 0, 0.5); /* ganti dari biru ke orange */
+}
+
+.cyber-toggle-checkbox:not(:checked)
+  ~ .cyber-toggle-labels
+  .cyber-toggle-label-off {
+  color: #aaa;
+}
+
+/* Animazione particelle quando attivo */
+.cyber-toggle-checkbox:checked + .cyber-toggle .cyber-toggle-particle {
+  opacity: 1;
+  animation: cyber-toggle-float 3s infinite alternate;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.cyber-toggle-checkbox:checked
+  + .cyber-toggle
+  .cyber-toggle-particle:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+/* Effetto hover */
+.cyber-toggle:hover .cyber-toggle-track::before {
+  background: #272727;
+}
+
+.cyber-toggle:hover .cyber-toggle-thumb {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.cyber-toggle-checkbox:checked + .cyber-toggle:hover .cyber-toggle-track-glow {
+  opacity: 0.7;
+}
+
+/* Effetto focus per accessibilità */
+.cyber-toggle-checkbox:focus + .cyber-toggle {
+  outline: none;
+}
+
+.cyber-toggle-checkbox:focus + .cyber-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 165, 0, 0.5);
+  opacity: 0.5;
+}
+
+/* === OFF STATE (putih dengan border hitam) === */
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-track {
+  background: white;
+  border: 2px solid black;
+  box-shadow: none;
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-track::before {
+  background: white;
+  box-shadow: none;
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-thumb {
+  background: white;
+  border: 2px solid black;
+  box-shadow: none;
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-thumb-icon svg {
+  fill: #000; /* Ikon hitam */
+}
+
+.cyber-toggle-checkbox:not(:checked) + .cyber-toggle .cyber-toggle-track-dot {
+  background: #000; /* Titik hitam */
+  box-shadow: none;
+}
+
+@keyframes cyber-toggle-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+      .spinner {
+    font-size: 18px;
+    vertical-align: middle;
+  }
+    .error-message {
+  color: #e74c3c;
+  font-size: 0.85em;
+  margin-top: 4px;
+  display: block;
+  text-align : center;
+}
+    .stok-display {
+  display: block;
+  text-align: center;
+  margin-top:4px;
+  color: #118B50;
+  font-size: 0.85em;
+}
+body.dark .stok-display {
+  color: #118B50;
+}
+.popup-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  max-width: 90vw;
+  min-width: 250px;
+  padding: 12px 20px;
+  background-color: #444;
+  color: #fff;
+  border-radius: 5px;
+  opacity: 0;
+  transform: translate(-50%, -60%); /* center + sedikit naik (dari -60% ke 0 saat show) */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 9999;
+  pointer-events: none;
+  font-weight: 600;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.popup-notification.show {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.popup-notification.success {
+  background-color: #28a745;
+}
+
+.popup-notification.error {
+  background-color: #dc3545;
+}
+
+.popup-notification.info {
+  background-color: #17a2b8;
+}
+
+/* Responsive font size kecil di layar sangat kecil */
+@media (max-width: 320px) {
+  .popup-notification {
+    font-size: 0.85rem;
+    padding: 10px 15px;
+    min-width: 200px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img id="header-img" class="header-img" src="https://i.imgur.com/hZkfDzO.png" alt="Header" draggable="false" />
+    <p class="subtitle">Silakan input data stok keluar dengan baik dan benar.</p>
+    <form id="mainForm" name="formoutputnew">
+      <div class="form-group">
+        <input type="date" id="tanggal" name="tanggal" required />
+      </div>
+      <div class="form-group">
+        <select id="barang" name="barang" required>
+          <option value="" disabled selected hidden>Pilih Nama Barang</option>
+        </select>
+        <div id="stokDisplay" class="stok-display"></div>
+      </div>
+      <div class="form-group">
+        <input type="number" id="qty" name="qty" min="1" placeholder="Qty" required />
+         <small id="stokError" class="error-message"></small>
+          <small id="qtyError" class="error-message"></small>
+      </div>
+      <div class="form-group">
+        <input type="text" id="satuan" name="satuan" placeholder="Satuan" readonly />
+      </div>
+      <div class="form-group">
+        <input type="text" id="harga" name="harga" placeholder="Harga Beli" required/>
+      </div>
+      <div class="form-group">
+        <input type="text" id="total" name="total" placeholder="Harga Total" readonly />
+      </div>
+      <div class="form-group">
+        <select id="metode" name="metode" required>
+          <option value="" disabled selected hidden>Pilih Metode Pembayaran</option>
+          <option value="CASH">CASH</option>
+          <option value="QRIS">QRIS</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <select id="infosaldo" name="infosaldo" required>
+          <option value="" disabled selected hidden>Info Saldo</option>
+          <option value="Saldo">Saldo</option>
+          <option value="Laba">Laba</option>
+        </select>
+      </div>
+      <div class="form-group full" style="text-align:center;">
+        <div class="button-wrapper">
+          <button type="button" class="animated-button menu-btn">
+            <span class="text">Menu Utama</span><span class="circle"></span>
+            <span class="spinner" style="display:none; margin-left:8px;">⏳</span>
+          </button>
+          <button type="submit" class="animated-button kirim-btn" id="submitBtn">
+            <span class="text">Submit</span>
+            <span class="circle"></span>
+            <span class="spinner" style="display:none; margin-left:8px;">⏳</span>
+          </button>
+          <button type="button" class="animated-button logout-btn">
+            <span class="text">Logout</span><span class="circle"></span>
+            <span class="spinner" style="display:none; margin-left:8px;">⏳</span>
+          </button>
+        </div>
+      </div>
+    </form>
+    <div class="copyright">© Minang Chicken 2025</div>
+  </div>
+
+  <!-- Popup Komentar -->
+  <div class="popup" id="popup" style="display:none;">
+    <div class="popup-content">
+      <p>Apakah Anda yakin ingin mengirim data ini?</p>
+      <textarea id="komentar" rows="3" placeholder="Tulis komentar (opsional)..."
+        style="width: 100%; margin-top: 1rem; padding: 0.5rem; border-radius: 8px; font-family: 'Montserrat'; border: 1px solid #ccc;"></textarea>
+      <div class="popup-buttons">
+        <button class="send" id="sendCommentBtn">Kirim</button>
+        <button class="cancel" id="cancelCommentBtn">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dark Mode Toggle dari Uiverse.io -->
+  <div class="cyber-toggle-wrapper">
+    <input class="cyber-toggle-checkbox" id="toggle-mode" type="checkbox" />
+    <label class="cyber-toggle" for="toggle-mode">
+        <div class="cyber-toggle-track">
+      <div class="cyber-toggle-track-glow"></div>
+      <div class="cyber-toggle-track-dots">
+        <span class="cyber-toggle-track-dot"></span>
+        <span class="cyber-toggle-track-dot"></span>
+        <span class="cyber-toggle-track-dot"></span>
+      </div>
+    </div>
+    <div class="cyber-toggle-thumb">
+      <div class="cyber-toggle-thumb-shadow"></div>
+      <div class="cyber-toggle-thumb-highlight"></div>
+      <div class="cyber-toggle-thumb-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M16.5 12c0-2.48-2.02-4.5-4.5-4.5s-4.5 2.02-4.5 4.5 2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5zm-4.5 7.5c-4.14 0-7.5-3.36-7.5-7.5s3.36-7.5 7.5-7.5 7.5 3.36 7.5 7.5-3.36 7.5-7.5 7.5zm0-16.5c-4.97 0-9 4.03-9 9h-3l3.89 3.89.07.14 4.04-4.03h-3c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42c1.63 1.63 3.87 2.64 6.36 2.64 4.97 0 9-4.03 9-9s-4.03-9-9-9z"
+          ></path>
+        </svg>
+      </div>
+    </div>
+    <div class="cyber-toggle-particles">
+      <span class="cyber-toggle-particle"></span>
+      <span class="cyber-toggle-particle"></span>
+      <span class="cyber-toggle-particle"></span>
+      <span class="cyber-toggle-particle"></span>
+    </div>
+    </label>
+    <div class="cyber-toggle-labels">
+      <span class="cyber-toggle-label-off">LIGHT </span>
+      <span class="cyber-toggle-label-on">  DARK</span>  
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // === KONSTANTA & ELEMEN DOM ===
+  const API_GET_URL = 'https://distinct-flint-fig.glitch.me/api/bahanstokinput?action=getBahanBakuInput';
+  const API_POST_URL = 'https://distinct-flint-fig.glitch.me/api/input-stok';
+
+  const DRAFT_KEY = 'formInputDraft';
+  const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 menit
+
+  const form = document.getElementById('mainForm');
+  const barangSelect = document.getElementById('barang');
+  const satuanInput = document.getElementById('satuan');
+  const hargaInput = document.getElementById('harga');
+  const qtyInput = document.getElementById('qty');
+  const totalInput = document.getElementById('total');
+  const infoSaldoSelect = document.getElementById('infosaldo');
+  const metodeSelect = document.getElementById('metode');
+  const tanggalInput = document.getElementById('tanggal');
+  const komentarInput = document.getElementById('komentar');
+
+  const popup = document.getElementById('popup');
+  const sendCommentBtn = document.getElementById('sendCommentBtn');
+  const cancelCommentBtn = document.getElementById('cancelCommentBtn');
+
+  const submitBtn = document.getElementById('submitBtn');
+  const menuBtn = document.querySelector('.menu-btn');
+  const logoutBtn = document.querySelector('.logout-btn');
+
+  const headerImg = document.getElementById('header-img');
+  const subtitle = document.querySelector('.subtitle');
+  const toggleCheckbox = document.getElementById('toggle-mode');
+
+  const lightImg = "https://i.imgur.com/hZkfDzO.png";
+  const darkImg = "https://i.imgur.com/FphwdgS.png";
+
+  let bahanData = [];
+  let idleTimer;
+
+  // === CEK LOGIN ===
+  const username = localStorage.getItem("username");
+  const nama = localStorage.getItem("nama");
+  if (!username || !nama) {
+    showPopup("Anda belum login. Silakan login terlebih dahulu.", 'error', 4000);
+    setTimeout(() => window.location.href = "/index.html", 4000);
+    return;
+  }
+
+  // === SETUP AWAL ===
+  setDefaultDate();
+  fetchBahanData();
+  restoreDraft();
+  initDarkMode();
+  resetIdleTimer();
+
+  // Reset idle timer saat user aktif (mouse, keyboard, scroll, touch)
+  ['mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt =>
+    document.addEventListener(evt, resetIdleTimer)
+  );
+
+  // Reset timer logout otomatis karena idle
+  function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      showPopup('Anda telah logout karena tidak aktif selama 15 menit.', 'error', 4000);
+      localStorage.clear();
+      setTimeout(() => window.location.href = '/index.html', 4000);
+    }, IDLE_TIMEOUT);
+  }
+
+  // === DARK MODE ===
+  function initDarkMode() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      enableDarkMode();
+      if (toggleCheckbox) toggleCheckbox.checked = true;
+    } else {
+      disableDarkMode();
+      if (toggleCheckbox) toggleCheckbox.checked = false;
+    }
+    if (toggleCheckbox) {
+      toggleCheckbox.addEventListener('change', () => {
+        toggleCheckbox.checked ? enableDarkMode() : disableDarkMode();
+      });
+    }
+  }
+
+  function enableDarkMode() {
+    document.body.classList.add('dark');
+    if (headerImg) headerImg.src = darkImg;
+    if (subtitle) subtitle.style.color = "#bbb";
+    localStorage.setItem('theme', 'dark');
+  }
+
+  function disableDarkMode() {
+    document.body.classList.remove('dark');
+    if (headerImg) headerImg.src = lightImg;
+    if (subtitle) subtitle.style.color = "#666";
+    localStorage.setItem('theme', 'light');
+  }
+
+  // Set tanggal default ke hari ini
+  function setDefaultDate() {
+    if (tanggalInput) {
+      tanggalInput.value = new Date().toISOString().slice(0, 10);
+    }
+  }
+
+  // === FETCH DATA BAHAN ===
+async function fetchBahanData() {
+  try {
+    const response = await fetch(API_GET_URL);
+    if (!response.ok) throw new Error('Gagal mengambil data bahan');
+    const data = await response.json();
+    if (!data.success) throw new Error('Data bahan tidak valid');
+
+    bahanData = data.data.map(row => ({
+      nama_bahan: row.namaBahan,
+      satuan: row.satuan,
+    }));
+
+    console.log('bahanData:', bahanData);
+    console.log('barangSelect sebelum update:', barangSelect);
+
+    updateNamaBahanOptions();
+
+    console.log('barangSelect setelah update:', barangSelect.innerHTML);
+
+  } catch (error) {
+    showPopup(error.message, 'error', 6000);
+  }
+}
+  // Update dropdown nama bahan
+function updateNamaBahanOptions() {
+  if (!barangSelect) return;
+  barangSelect.innerHTML = '<option value="">-- Pilih Nama Bahan --</option>';
+  bahanData.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item.nama_bahan;
+    option.textContent = item.nama_bahan;
+    barangSelect.appendChild(option);
+  });
+}
+
+  // === DRAFT LOCALSTORAGE ===
+  function restoreDraft() {
+    const draftStr = localStorage.getItem(DRAFT_KEY);
+    if (draftStr) {
+      try {
+        const draft = JSON.parse(draftStr);
+        if (tanggalInput && draft.tanggal) tanggalInput.value = draft.tanggal;
+        if (barangSelect) barangSelect.value = draft.barang || "";
+        if (qtyInput) qtyInput.value = draft.qty || "";
+        if (metodeSelect) metodeSelect.value = draft.metode || "";
+        if (infoSaldoSelect) infoSaldoSelect.value = draft.infosaldo || "";
+        if (komentarInput) komentarInput.value = draft.komentar || "";
+        updateFieldsByBarang(draft.barang);
+      } catch (e) {
+        console.error('Gagal restore draft:', e);
+      }
+    }
+  }
+
+  function saveDraft() {
+    if (!(tanggalInput && barangSelect && qtyInput && metodeSelect && infoSaldoSelect && komentarInput)) return;
+
+    const draft = {
+      tanggal: tanggalInput.value,
+      barang: barangSelect.value,
+      qty: qtyInput.value,
+      metode: metodeSelect.value,
+      infosaldo: infoSaldoSelect.value,
+      komentar: komentarInput.value
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  }
+
+  // Update satuan dan harga saat barang dipilih
+  function updateFieldsByBarang(namaBarang) {
+    const item = bahanData.find(b => b.nama_bahan === namaBarang);
+    if (satuanInput) satuanInput.value = item?.satuan || "";
+    if (hargaInput) hargaInput.value = item ? formatRupiah(item.harga_jual.toString()) : "";
+    updateTotal();
+  }
+
+  // Hitung dan update total harga
+  function updateTotal() {
+    if (!(qtyInput && hargaInput && totalInput)) return;
+
+    const qty = parseFloat(qtyInput.value);
+    const hargaStr = hargaInput.value.replace(/[^0-9]/g, "");
+    const harga = parseFloat(hargaStr);
+    totalInput.value = (!isNaN(qty) && !isNaN(harga)) ? formatRupiah((qty * harga).toString()) : "";
+  }
+
+  // Format angka jadi Rupiah
+  function formatRupiah(angka) {
+    let numberString = angka.toString().replace(/[^,\d]/g, "");
+    let split = numberString.split(",");
+    let sisa = split[0].length % 3;
+    let rupiah = split[0].substr(0, sisa);
+    let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+    if (ribuan) {
+      let separator = sisa ? "." : "";
+      rupiah += separator + ribuan.join(".");
+    }
+
+    rupiah = split[1] !== undefined ? rupiah + "," + split[1] : rupiah;
+    return "Rp" + rupiah;
+  }
+
+  // Bersihkan form dan draft
+  function clearForm() {
+    if (!form) return;
+    form.reset();
+    if (satuanInput) satuanInput.value = "";
+    if (hargaInput) hargaInput.value = "";
+    if (totalInput) totalInput.value = "";
+    setDefaultDate();
+    if (komentarInput) komentarInput.value = "";
+    localStorage.removeItem(DRAFT_KEY);
+  }
+
+  // === EVENT LISTENERS FORM ===
+  if (barangSelect) {
+    barangSelect.addEventListener('change', () => {
+      updateFieldsByBarang(barangSelect.value);
+      saveDraft();
+    });
+  }
+
+  if (qtyInput) {
+    qtyInput.addEventListener('input', () => {
+      updateTotal();
+      saveDraft();
+    });
+  }
+
+  if (hargaInput) {
+    hargaInput.addEventListener('input', () => {
+      const raw = hargaInput.value.replace(/[^0-9]/g, "");
+      hargaInput.value = formatRupiah(raw);
+      updateTotal();
+      saveDraft();
+    });
+  }
+
+  [infoSaldoSelect, metodeSelect, tanggalInput].forEach(el => {
+    if (el) el.addEventListener('change', saveDraft);
+  });
+
+  if (komentarInput) {
+    komentarInput.addEventListener('input', saveDraft);
+  }
+
+  // Tampilkan popup konfirmasi saat submit form
+  if (form && popup) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      popup.style.display = 'flex';
+    });
+  }
+
+  if (cancelCommentBtn && popup) {
+    cancelCommentBtn.addEventListener('click', () => {
+      popup.style.display = 'none';
+    });
+  }
+
+  // === KIRIM DATA KE SERVER ===
+  if (sendCommentBtn && popup && submitBtn) {
+    sendCommentBtn.addEventListener('click', async () => {
+      popup.style.display = 'none';
+      toggleSpinner(submitBtn, true);
+
+      // Siapkan payload JSON dengan data dari form
+      const payload = {
+        namaStaf: nama,
+        tanggal: tanggalInput?.value || '',
+        namaBahan: barangSelect?.value || '',
+        qty: qtyInput?.value || '',
+        satuan: satuanInput?.value || '',
+        hargaJual: hargaInput?.value.replace(/[^0-9]/g, "") || '',
+        total: totalInput?.value.replace(/[^0-9]/g, "") || '',
+        metodePembayaran: metodeSelect?.value || '',
+        infosaldo: infoSaldoSelect?.value || '',
+        komentar: komentarInput?.value || '',
+        action: "addNewInputData"
+      };
+
+      try {
+        const response = await fetch(API_POST_URL, {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message || "Gagal mengirim data");
+
+        showPopup("Data berhasil disimpan!", 'success', 3000);
+        clearForm();
+        await fetchBahanData();
+      } catch (error) {
+        showPopup("Gagal mengirim data: " + error.message, "error", 6000);
+      } finally {
+        toggleSpinner(submitBtn, false);
+      }
+    });
+  }
+
+  // === FUNGSI MENAMPILKAN NOTIFIKASI POPUP ===
+  // type: 'info' (default), 'error', 'success'
+  function showPopup(message, type = 'info', duration = 3000) {
+    const popupDiv = document.createElement('div');
+    popupDiv.textContent = message;
+    popupDiv.className = 'popup-notification';
+    popupDiv.classList.add(type);
+    document.body.appendChild(popupDiv);
+
+    // Trigger animasi masuk
+    requestAnimationFrame(() => popupDiv.classList.add('show'));
+
+    // Hapus popup setelah durasi timeout
+    setTimeout(() => {
+      popupDiv.classList.remove('show');
+      popupDiv.addEventListener('transitionend', () => popupDiv.remove(), { once: true });
+    }, duration);
+  }
+
+  // === TOMBOL MENU DAN LOGOUT ===
+  if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+      toggleSpinner(menuBtn, true);
+      setTimeout(() => {
+        toggleSpinner(menuBtn, false);
+        window.location.href = "/menu.html";
+      }, 1000);
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      toggleSpinner(logoutBtn, true);
+      setTimeout(() => {
+        localStorage.clear();
+        toggleSpinner(logoutBtn, false);
+        window.location.href = "/index.html";
+      }, 1000);
+    });
+  }
+
+  // === TOGGLE SPINNER SAAT SUBMIT ===
+  function toggleSpinner(button, show) {
+    if (!button) return;
+    const spinner = button.querySelector('.spinner');
+    const text = button.querySelector('.btn-text, .text');
+    if (show) {
+      if (spinner) spinner.style.display = 'inline-block';
+      if (text) text.style.display = 'none';
+      button.disabled = true;
+    } else {
+      if (spinner) spinner.style.display = 'none';
+      if (text) text.style.display = '';
+      button.disabled = false;
+    }
+  }
+});
+</script>
+</body>
+</html>

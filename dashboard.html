@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Keuangan | Circl Clone</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-light: #ffffff;
+      --text-light: #1a1a1a;
+      --grid-light: rgba(0,0,0,0.1);
+    }
+    body.dark {
+      --bg-dark: #121212;
+      --text-dark: #e0e0e0;
+      --grid-dark: rgba(255,255,255,0.12);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--bg-light);
+      background-image:
+        linear-gradient(to right, var(--grid-light) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-light) 1px, transparent 1px);
+      background-size: 20px 20px;
+      color: var(--text-light);
+      transition: background-color .5s, color .5s;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body.dark {
+      background-color: var(--bg-dark);
+      background-image:
+        linear-gradient(to right, var(--grid-dark) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-dark) 1px, transparent 1px);
+      color: var(--text-dark);
+    }
+    a { text-decoration: none; }
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 260px; height: 100vh;
+      background: #242a38; color: #cfd8dc;
+      padding: 20px; box-sizing: border-box;
+      display: flex; flex-direction: column;
+      transition: width .3s;
+      overflow: hidden;
+      z-index: 1050;
+    }
+  #sidebar.collapsed {
+   width: 100px !important;
+  padding-left: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* ini buat center semua anak elemen */
+  }
+    #sidebar .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem; font-weight: 700;
+      margin-bottom: 40px; text-align: center;
+      white-space: nowrap; overflow: hidden;
+      transition: opacity .3s, height .3s, margin .3s;
+    }
+
+#sidebar.collapsed .logo {
+  margin: 20px 0 30px 0; /* margin atas bawah saja */
+  padding-left: 0;
+  width: auto;
+  display: block;
+  text-align: center;
+}
+
+    #sidebar .nav-link {
+      display: flex; align-items: center; gap: 15px;
+      color: #a9b0c1; font-weight: 500; font-size: 1rem;
+      padding: 12px 20px; border-radius: 8px;
+      transition: background .3s, color .3s, padding .3s;
+      overflow: hidden; white-space: nowrap;
+      margin-bottom: 8px;
+    }
+    #sidebar .nav-link:hover,
+    #sidebar .nav-link.active {
+      background: #5b66b4; color: #fff;
+    }
+    #sidebar.collapsed .nav-link {
+      justify-content: center; padding: 14px 0; font-size: 1.4rem;
+    }
+    #sidebar .nav-link i {
+      font-size: 1.4rem; min-width: 40px; text-align: center;
+      transition: min-width .3s;
+    }
+    #sidebar.collapsed .nav-link i {
+      min-width: 0;
+    }
+    #sidebar .nav-text {
+      flex: 1; transition: opacity .3s, width .3s;
+      white-space: nowrap; overflow: hidden;
+    }
+    #sidebar.collapsed .nav-text {
+      opacity: 0; width: 0; pointer-events: none;
+    }
+
+    /* Main content */
+    #content {
+      margin-left: 260px; padding: 25px 35px;
+      transition: margin-left .3s;
+    }
+    #content.collapsed {
+      margin-left: 70px;
+    }
+
+    /* Topbar */
+    #topbar {
+      height: 60px; background: #fff; border-bottom: 1px solid #dee2e6;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 25px; position: sticky; top: 0; z-index: 1000;
+    }
+    #sidebarToggle {
+      font-size: 1.5rem; color: #5b66b4; cursor: pointer;
+      transition: color .3s;
+    }
+    #sidebarToggle:hover {
+      color: #3f46a1;
+    }
+    #topbar .profile {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 600; color: #444;
+    }
+    #topbar .profile img {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 2px solid #5b66b4;
+      transition: border .3s;
+      object-fit: cover;
+    }
+    #topbar .profile:hover img {
+      border-color: #3f46a1;
+    }
+
+    /* Filters */
+    #filters .form-label {
+      font-weight: 600;
+    }
+    #filters .btn {
+      background: #5b66b4; border: 0;
+    }
+    #filters .btn:hover {
+      background: #3f46a1;
+    }
+
+    /* Cards container */
+    .cards {
+      display: flex; flex-wrap: wrap; gap: 20px; margin-top: 25px;
+    }
+    .card {
+      background: #fff; flex: 1 1 280px;
+      padding: 20px; border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.07);
+      display: flex; flex-direction: column;
+      justify-content: center;
+    }
+    .card h5 {
+      font-weight: 600; margin-bottom: 8px;
+    }
+    .card h2 {
+      font-weight: 700; font-size: 2.2rem; margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card p {
+      font-size: 0.9rem; color: #666;
+    }
+
+    /* Category titles */
+    .category {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .category h4 {
+      width: 100%;
+      font-weight: 700;
+      color: #5b66b4;
+      margin: 30px 0 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+    }
+
+    /* Chart container */
+    #chartContainer {
+      background: #fff;
+      padding: 20px;
+      margin-top: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.07);
+      max-width: 900px; width: 100%;
+      overflow-x: auto;
+    }
+
+    /* Responsive */
+    @media(max-width: 768px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+      #sidebar.collapsed {
+        transform: translateX(0);
+        width: 260px;
+      }
+      #content {
+        margin-left: 0;
+        padding: 20px 15px;
+      }
+      #content.collapsed {
+        margin-left: 0;
+      }
+      .cards {
+        flex-direction: column;
+      }
+    }
+      /* Category container diubah jadi grid 2 kolom */
+  .category-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-top: 25px;
+}
+
+/* Set tiap kolom berisi beberapa kategori */
+.category-column {
+  flex: 1 1 45%; /* sekitar 2 kolom */
+  min-width: 280px;
+}
+
+/* Category tetap pakai flex-wrap supaya card berjajar horizontal */
+.category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.category h4 {
+  width: 100%;
+  font-weight: 700;
+  color: #5b66b4;
+  margin: 30px 0 10px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+
+
+  /* Cards tetap style card seperti sebelumnya */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  height: 130px; /* sesuaikan kalau mau card lebih tinggi atau pendek */
+  border-radius: 8px; /* biar card lebih menarik */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+  /* ...style card lain tetap... */
+
+  /* Responsive adjustment */
+  @media(max-width: 768px) {
+    .category {
+      grid-template-columns: 1fr; /* 1 kolom di mobile */
+      gap: 15px 0;
+    }
+    .category h4 {
+      margin-bottom: 15px;
+    }
+  }
+  </style>
+</head>
+<body>
+  <aside id="sidebar" class="collapsed" aria-label="Sidebar Navigation">
+    <div class="logo" aria-hidden="true">CIRCL</div>
+    <a href="#" class="nav-link active" aria-current="page"><i class="fa fa-home" aria-hidden="true"></i><span class="nav-text">Dashboard</span></a>
+    <a href="#" class="nav-link"><i class="fa fa-wallet" aria-hidden="true"></i><span class="nav-text">Cash</span></a>
+    <a href="#" class="nav-link"><i class="fa fa-credit-card" aria-hidden="true"></i><span class="nav-text">QRIS</span></a>
+    <a href="#" class="nav-link"><i class="fa fa-cogs" aria-hidden="true"></i><span class="nav-text">Settings</span></a>
+  </aside>
+
+  <main id="content" class="collapsed" role="main">
+    <nav id="topbar" aria-label="Top Navigation Bar">
+      <button id="sidebarToggle" aria-label="Toggle Sidebar" aria-expanded="false"><i class="fa fa-bars"></i></button>
+      <div class="profile" role="region" aria-label="User Profile">
+        <img src="https://i.pravatar.cc/150?img=3" alt="Admin Profile Picture" />
+        <span>Admin</span>
+      </div>
+    </nav>
+
+    <!-- Filters -->
+    <section id="filters" class="row g-3 align-items-end" aria-label="Filter Section">
+      <div class="col-md-3">
+        <label for="startDate" class="form-label">Tanggal Awal</label>
+        <input type="date" id="startDate" class="form-control" />
+      </div>
+      <div class="col-md-3">
+        <label for="endDate" class="form-label">Tanggal Akhir</label>
+        <input type="date" id="endDate" class="form-control" />
+      </div>
+      <div class="col-md-3">
+        <label for="outlet" class="form-label">Outlet</label>
+        <select id="outlet" class="form-select" aria-label="Select Outlet">
+          <option value="">Semua Outlet</option>
+          <option value="Outlet A">Outlet A</option>
+          <option value="Outlet B">Outlet B</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button id="applyFilter" class="btn btn-primary w-100">Terapkan Filter</button>
+      </div>
+    </section>
+
+    <!-- Cards Grouped by Category -->
+    <section class="cards category-container" aria-label="Financial Summary Cards">
+  <div class="category-column">
+    <div class="category">
+      <h4>Pendapatan</h4>
+      <div class="card bg-light" role="region" aria-label="Pendapatan Cash">
+        <h5>Pendapatan Cash</h5>
+        <h2 id="revCash" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-light" role="region" aria-label="Pendapatan QRIS">
+        <h5>Pendapatan QRIS</h5>
+        <h2 id="revQris" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-success text-white" role="region" aria-label="Total Pendapatan">
+        <h5>Total Pendapatan</h5>
+        <h2 id="revTotal" aria-live="polite">Rp0</h2>
+      </div>
+    </div>
+
+    <div class="category">
+      <h4>Pengeluaran</h4>
+      <div class="card bg-light" role="region" aria-label="Pengeluaran Cash">
+        <h5>Pengeluaran Cash</h5>
+        <h2 id="expCash" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-light" role="region" aria-label="Pengeluaran QRIS">
+        <h5>Pengeluaran QRIS</h5>
+        <h2 id="expQris" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-danger text-white" role="region" aria-label="Total Pengeluaran">
+        <h5>Total Pengeluaran</h5>
+        <h2 id="expTotal" aria-live="polite">Rp0</h2>
+      </div>
+    </div>
+
+    <div class="category">
+      <h4>Biaya Operasional</h4>
+      <div class="card bg-light" role="region" aria-label="Biaya Operasional Cash">
+        <h5>Biaya Operasional Cash</h5>
+        <h2 id="opCash" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-light" role="region" aria-label="Biaya Operasional QRIS">
+        <h5>Biaya Operasional QRIS</h5>
+        <h2 id="opQris" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-warning text-dark" role="region" aria-label="Total Biaya Operasional">
+        <h5>Total Biaya Operasional</h5>
+        <h2 id="opTotal" aria-live="polite">Rp0</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-column">
+    <div class="category">
+      <h4>Laba Kotor</h4>
+      <div class="card bg-light" role="region" aria-label="Laba Kotor Cash">
+        <h5>Laba Kotor Cash</h5>
+        <h2 id="grossCash" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-light" role="region" aria-label="Laba Kotor QRIS">
+        <h5>Laba Kotor QRIS</h5>
+        <h2 id="grossQris" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-primary text-white" role="region" aria-label="Total Laba Kotor">
+        <h5>Total Laba Kotor</h5>
+        <h2 id="grossTotal" aria-live="polite">Rp0</h2>
+      </div>
+    </div>
+
+    <div class="category">
+      <h4>Laba Bersih</h4>
+      <div class="card bg-light" role="region" aria-label="Laba Bersih Cash">
+        <h5>Laba Bersih Cash</h5>
+        <h2 id="netCash" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-light" role="region" aria-label="Laba Bersih QRIS">
+        <h5>Laba Bersih QRIS</h5>
+        <h2 id="netQris" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-info text-white" role="region" aria-label="Total Laba Bersih">
+        <h5>Total Laba Bersih</h5>
+        <h2 id="netTotal" aria-live="polite">Rp0</h2>
+      </div>
+    </div>
+
+    <div class="category">
+      <h4>Saldo</h4>
+      <div class="card bg-light" role="region" aria-label="Saldo Cash">
+        <h5>Saldo Cash</h5>
+        <h2 id="balCash" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-light" role="region" aria-label="Saldo QRIS">
+        <h5>Saldo QRIS</h5>
+        <h2 id="balQris" aria-live="polite">Rp0</h2>
+      </div>
+      <div class="card bg-dark text-white" role="region" aria-label="Total Saldo">
+        <h5>Total Saldo</h5>
+        <h2 id="balTotal" aria-live="polite">Rp0</h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- Chart -->
+    <section id="chartContainer" aria-label="Grafik Pendapatan dan Pengeluaran">
+      <canvas id="financeChart" role="img" aria-describedby="chartDesc"></canvas>
+      <p id="chartDesc" class="visually-hidden">Grafik garis menampilkan pendapatan dan pengeluaran selama waktu tertentu.</p>
+    </section>
+  </main>
+
+<!-- Bootstrap and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+  const content = document.getElementById('content');
+  const toggleBtn = document.getElementById('sidebarToggle');
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    content.classList.toggle('collapsed');
+    
+    const expanded = toggleBtn.getAttribute("aria-expanded") === "true";
+    toggleBtn.setAttribute("aria-expanded", !expanded);
+  });
+  // Format rupiah helper
+  function formatRupiah(number) {
+    return 'Rp' + number.toLocaleString('id-ID');
+  }
+
+  // Contoh data awal
+  const data = {
+    revCash: 5000000,
+    revQris: 7500000,
+    expCash: 2000000,
+    expQris: 1500000,
+    opCash: 500000,
+    opQris: 300000,
+  };
+
+  // Inisialisasi Chart
+  const ctx = document.getElementById('financeChart')?.getContext('2d');
+  let financeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+      datasets: [
+        {
+          label: 'Pendapatan',
+          data: [5000000, 7000000, 6000000, 7500000],
+          borderColor: '#5b66b4',
+          backgroundColor: 'rgba(91, 102, 180, 0.2)',
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: 'Pengeluaran',
+          data: [2000000, 2500000, 2200000, 1500000],
+          borderColor: '#d9534f',
+          backgroundColor: 'rgba(217, 83, 79, 0.2)',
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { mode: 'index', intersect: false },
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false,
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => `Rp${value.toLocaleString('id-ID')}`,
+          },
+        },
+      },
+    },
+  });
+
+  // Update isi kartu laporan
+  function updateCards(data) {
+    // Perhitungan total
+    const revTotal = data.revCash + data.revQris;
+    const expTotal = data.expCash + data.expQris;
+    const opTotal = data.opCash + data.opQris;
+
+    // Laba Kotor = Pendapatan - Pengeluaran
+    const grossCash = data.revCash - data.expCash;
+    const grossQris = data.revQris - data.expQris;
+    const grossTotal = grossCash + grossQris;
+
+    // Laba Bersih = Laba Kotor - Operasional
+    const netCash = grossCash - data.opCash;
+    const netQris = grossQris - data.opQris;
+    const netTotal = netCash + netQris;
+
+    // Saldo = Laba Bersih
+    const balCash = netCash;
+    const balQris = netQris;
+    const balTotal = balCash + balQris;
+
+    // Isi elemen
+    const update = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = formatRupiah(value);
+    };
+
+    update('revCash', data.revCash);
+    update('revQris', data.revQris);
+    update('revTotal', revTotal);
+
+    update('expCash', data.expCash);
+    update('expQris', data.expQris);
+    update('expTotal', expTotal);
+
+    update('opCash', data.opCash);
+    update('opQris', data.opQris);
+    update('opTotal', opTotal);
+
+    update('grossCash', grossCash);
+    update('grossQris', grossQris);
+    update('grossTotal', grossTotal);
+
+    update('netCash', netCash);
+    update('netQris', netQris);
+    update('netTotal', netTotal);
+
+    update('balCash', balCash);
+    update('balQris', balQris);
+    update('balTotal', balTotal);
+  }
+
+  // Jalankan saat awal
+  updateCards(data);
+
+  // Filter event handler
+  document.getElementById('applyFilter')?.addEventListener('click', () => {
+    // Dummy data filter
+    const newData = {
+      revCash: 6000000,
+      revQris: 8000000,
+      expCash: 2500000,
+      expQris: 2000000,
+      opCash: 700000,
+      opQris: 400000,
+    };
+
+    updateCards(newData);
+
+    // Update Chart
+    financeChart.data.datasets[0].data = [6000000, 7500000, 7000000, 8000000];
+    financeChart.data.datasets[1].data = [2500000, 2700000, 2300000, 2000000];
+    financeChart.update();
+  });
+  
+</script>
+
+</body>
+</html>
